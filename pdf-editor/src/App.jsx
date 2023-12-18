@@ -20,13 +20,17 @@ function App() {
             alt="logo"
             className="absolute w-32 h-10 left-12 top-6"
           />
-          <div className="textContainer grid grid-cols-4">
-            <div className="leftText col-span-1 uppercase text-white -rotate-90">
+          <div className="textContainer grid grid-cols-4 ">
+            <p className="leftText col-span-1 m-auto pb-64 uppercase text-white -rotate-90 w-max h-12">
               TECHNICAL TEST FRO FRENTEND DEVELOPER
-            </div>
-            <div className="rightText col-span-3">
-              <p className="heading"></p>
-              <p className="subHeading"></p>
+            </p>
+            <div className="rightText col-span-3 flex flex-col gap-12">
+              <p className="heading text-6xl text-white">
+                All your services, No-code.
+              </p>
+              <p className="subHeading text-white text-lg">
+                Build your business apps and automate your tasks without coding.
+              </p>
               <button className="editBtn w-64 h-12 bg-transparent text-white rounded-full border-2 border-color-white hover:bg-white hover:text-[#5068F2]">
                 Edit a PDF
               </button>
