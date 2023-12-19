@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#root {
+    font-family: normal normal 300 30px/46px Poppins;
+}
