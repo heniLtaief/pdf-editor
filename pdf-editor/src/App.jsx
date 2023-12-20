@@ -132,7 +132,7 @@ function App() {
           <div className="editText flex flex-col md:flex-row justify-center items-center gap-1 w-full h-[500px] mt-20 z-20 relative">
             {viewPdf && (
               <>
-                <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+                <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
                   <Viewer
                     fileUrl={viewPdf}
                     plugins={[defaultLayoutPluginInstance]}
