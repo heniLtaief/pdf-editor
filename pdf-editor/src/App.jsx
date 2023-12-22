@@ -17,7 +17,6 @@ function App() {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   // for onchange event
-  const [pdfFile, setPdfFile] = useState(null);
   const [pdfFileError, setPdfFileError] = useState("");
 
   // for submit event
@@ -25,6 +24,13 @@ function App() {
 
   // onchange event
   const fileType = ["application/pdf"];
+
+  const fileInputRef = useRef(null);
+
+  const handleSpanClick = () => {
+    fileInputRef.current.click();
+  };
+
   const handlePdfFileChange = (e) => {
     let selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -32,33 +38,15 @@ function App() {
         let reader = new FileReader();
         reader.readAsDataURL(selectedFile);
         reader.onloadend = (e) => {
-          setPdfFile(e.target.result);
           setPdfFileError("");
+          setViewPdf(e.target.result);
         };
       } else {
-        setPdfFile(null);
-        setPdfFileError("Please select valid pdf file");
+        setPdfFileError("Please select a valid PDF file");
       }
     } else {
-      console.log("select your file");
+      console.log("Select your file");
     }
-  };
-
-  // form submit
-  const handlePdfFileSubmit = (e) => {
-    e.preventDefault();
-    if (pdfFile !== null) {
-      setViewPdf(pdfFile);
-    } else {
-      setViewPdf(null);
-    }
-  };
-
-  const fileInputRef = useRef(null);
-
-  // Click event for the span
-  const handleSpanClick = () => {
-    fileInputRef.current.click();
   };
 
   return (
@@ -86,23 +74,26 @@ function App() {
               <p className="text-xl my-4">
                 Build your business apps and automate your tasks without coding.
               </p>
-              <form className="form-group" onSubmit={handlePdfFileSubmit}>
-                {/* <input
+
+              <>
+                <input
+                  ref={fileInputRef}
                   type="file"
-                  className="form-control "
+                  className="hidden"
                   required
                   onChange={handlePdfFileChange}
-                /> */}
-                {pdfFileError && (
-                  <div className="error-msg">{pdfFileError}</div>
-                )}
+                />
                 <button
+                  onClick={handleSpanClick}
                   type="submit"
                   className="editBtn w-64 h-10 bg-transparent text-lg text-white font-bold rounded-full border-2 over:border-[#5068F2] border-white hover:bg-white hover:text-[#5068F2]"
                 >
                   Edit a PDF
                 </button>
-              </form>
+                {pdfFileError && (
+                  <div className="error-msg">{pdfFileError}</div>
+                )}
+              </>
             </div>
           </div>
         </div>
@@ -138,26 +129,6 @@ function App() {
                     plugins={[defaultLayoutPluginInstance]}
                   />
                 </Worker>
-              </>
-            )}
-            {!viewPdf && (
-              <>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  required
-                  onChange={handlePdfFileChange}
-                />
-                <p className="title lg:text-black text-md text-white">
-                  TECHNICAL TEST FOR FRONTEND DEVELOPER
-                </p>
-                <span
-                  onClick={handleSpanClick}
-                  className="edit text-md text-[#5068F2] hover:underline cursor-pointer"
-                >
-                  Import a PDF
-                </span>
               </>
             )}
           </div>
