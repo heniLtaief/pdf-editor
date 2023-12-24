@@ -6,6 +6,7 @@ import MaskOne from "./assets/mask1.png";
 import MaskTwo from "./assets/mask2.png";
 import EditButtons from "./components/EditButtons";
 import PdfView from "./components/PdfView";
+import RightSectionHeader from "./components/RightSectionHeader";
 
 function App() {
   const [pdfFileError, setPdfFileError] = useState("");
@@ -19,7 +20,7 @@ function App() {
   const handleSpanClick = () => {
     const newFileInput = document.createElement("input");
     newFileInput.type = "file";
-    newFileInput.accept = "application/pdf"; // Set the accepted file type if needed
+    newFileInput.accept = "application/pdf";
 
     newFileInput.addEventListener("change", handlePdfFileChange);
 
@@ -73,6 +74,7 @@ function App() {
     }
   };
 
+  // Embed an image
   const handleImageButtonClick = async () => {
     if (viewPdf) {
       try {
@@ -169,14 +171,7 @@ function App() {
         </div>
         <div className="lg:w-1/2 w-full flex flex-col items-center justify-center text-center md:px-6 px-0 z-0 relative">
           <img src={MaskOne} alt="mask" className="absolute top-0" />
-          <div className="absolute mx-auto top-2 z-20 text-center w-full">
-            <h1 className="rightTitle text-3xl text-white font-semibold lg:text-black">
-              PDF Editor
-            </h1>
-            <p className="py-2 space-x-2 text-white lg:text-black text-xl">
-              Edit PDF files. Fill & sign PDF
-            </p>
-          </div>
+          <RightSectionHeader />
           <div className="flex absolute lg:hidden z-10 inset-0 bg-gray-500 bg-no-repeat bg-cover items-center">
             <div className="absolute bg-black opacity-60 inset-0 z-0">
               {!viewPdf && (
