@@ -1,36 +1,33 @@
 import { useState, useRef } from "react";
-import { Viewer } from "@react-pdf-viewer/core"; // install this library
-// Plugins
-import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout"; // install this library
-// Import the styles
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/default-layout/lib/styles/index.css";
-// Worker
-import { Worker } from "@react-pdf-viewer/core"; // install this library
+import { PDFDocument } from "pdf-lib";
 import BgImage from "./assets/background.png";
 import Logo from "./assets/logo.png";
 import MaskOne from "./assets/mask1.png";
 import MaskTwo from "./assets/mask2.png";
+import EditButtons from "./components/EditButtons";
+import PdfView from "./components/PdfView";
 
 function App() {
-  // Create new plugin instance
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
-
-  // for onchange event
   const [pdfFileError, setPdfFileError] = useState("");
 
-  // for submit event
   const [viewPdf, setViewPdf] = useState(null);
 
-  // onchange event
   const fileType = ["application/pdf"];
 
   const fileInputRef = useRef(null);
 
   const handleSpanClick = () => {
-    fileInputRef.current.click();
+    const newFileInput = document.createElement("input");
+    newFileInput.type = "file";
+    newFileInput.accept = "application/pdf"; // Set the accepted file type if needed
+
+    newFileInput.addEventListener("change", handlePdfFileChange);
+
+    // Trigger a click event on the new input
+    newFileInput.click();
   };
 
+  // Import a PDF file
   const handlePdfFileChange = (e) => {
     let selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -46,6 +43,79 @@ function App() {
       }
     } else {
       console.log("Select your file");
+    }
+  };
+
+  // Create text field inputs and  field names
+  const handleTextButtonClick = async () => {
+    if (viewPdf) {
+      try {
+        const pdfDoc = await PDFDocument.load(viewPdf);
+        const form = pdfDoc.getForm();
+
+        // Adding a text field at a specific location on the first page
+        const page = pdfDoc.getPages()[0];
+        page.drawText("Name: ", {
+          x: 50,
+          y: 700,
+          size: 20,
+        });
+        const textField = form.createTextField("custom.text.field");
+        textField.setText(""); // Set initial text if needed
+        textField.addToPage(page, { x: 120, y: 700 });
+        // Save the modified PDF
+        const modifiedPdfBytes = await pdfDoc.save();
+        // Update the state with the modified PDF
+        setViewPdf(modifiedPdfBytes);
+      } catch (error) {
+        console.error("Error creating form field:", error);
+      }
+    }
+  };
+
+  const handleImageButtonClick = async () => {
+    if (viewPdf) {
+      try {
+        const pdfDoc = await PDFDocument.load(viewPdf);
+
+        const page = pdfDoc.getPages()[0];
+
+        // Display a file input for selecting an image from your desktop
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.click();
+
+        // Handle the selected image file
+        input.addEventListener("change", async (e) => {
+          const selectedImage = e.target.files[0];
+
+          if (selectedImage) {
+            const imageBytes = await selectedImage.arrayBuffer();
+            const embeddedImage = await pdfDoc.embedPng(imageBytes);
+
+            // Adjust the position and size for bottom right for example
+            const imageDims = embeddedImage.scale(0.5);
+            const xPosition = page.getWidth() - imageDims.width - 20;
+            const yPosition = 20;
+
+            page.drawImage(embeddedImage, {
+              x: xPosition,
+              y: yPosition,
+              width: imageDims.width,
+              height: imageDims.height,
+            });
+
+            // Save the modified PDF
+            const modifiedPdfBytes = await pdfDoc.save();
+
+            // Update the state with the modified PDF
+            setViewPdf(modifiedPdfBytes);
+          }
+        });
+      } catch (error) {
+        console.error("Error adding image:", error);
+      }
     }
   };
 
@@ -107,36 +177,42 @@ function App() {
               Edit PDF files. Fill & sign PDF
             </p>
           </div>
-          <div className="absolute lg:hidden z-10 inset-0 bg-gray-500 bg-no-repeat bg-cover items-center">
-            <div className="absolute bg-black opacity-60 inset-0 z-0"></div>
-          </div>
-          {viewPdf && (
-            <div className="editBtn absolute mx-auto flex items-center top-24 gap-6">
-              <button className="h-8 w-24 rounded-lg bg-[#5569F7] text-white">
-                Text
-              </button>
-              <button className="h-8 w-24 rounded-lg bg-[#5569F7] text-white">
-                Image
-              </button>
-            </div>
-          )}
-          <div className="editText flex flex-col md:flex-row justify-center items-center gap-1 w-full h-[500px] mt-20 z-20 relative">
-            {viewPdf && (
-              <>
-                <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-                  <Viewer
-                    fileUrl={viewPdf}
-                    plugins={[defaultLayoutPluginInstance]}
+          <div className="flex absolute lg:hidden z-10 inset-0 bg-gray-500 bg-no-repeat bg-cover items-center">
+            <div className="absolute bg-black opacity-60 inset-0 z-0">
+              {!viewPdf && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    required
+                    onChange={handlePdfFileChange}
                   />
-                </Worker>
-              </>
-            )}
+                  <button
+                    onClick={handleSpanClick}
+                    type="submit"
+                    className="editBtn w-64 h-10 z-30 mt-96 bg-[#5068F2] text-lg text-white font-bold rounded-full opacity-1 hover:bg-white hover:text-[#5068F2]"
+                  >
+                    Edit a PDF
+                  </button>
+                  {pdfFileError && (
+                    <div className="error-msg">{pdfFileError}</div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
           {viewPdf && (
-            <div className="exportBtn absolute bottom-4 right-6">
-              <button className="h-10 w-32 rounded-md bg-[#5569F7] text-white">
-                Export
-              </button>
+            <div className="editText flex flex-col md:flex-row justify-center items-center gap-1 border-2 border-gray-700 w-[90%] h-[500px] mt-20 z-20 relative">
+              {viewPdf && (
+                <div className="editBtn absolute mx-auto z-32 flex items-center -top-12 gap-6">
+                  <EditButtons
+                    handleTextButtonClick={handleTextButtonClick}
+                    handleImageButtonClick={handleImageButtonClick}
+                  />
+                </div>
+              )}
+              <PdfView viewPdf={viewPdf} />
             </div>
           )}
           <img src={MaskTwo} alt="mask" className="absolute bottom-0" />
